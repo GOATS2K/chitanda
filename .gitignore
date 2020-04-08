@@ -105,3 +105,6 @@ venv.bak/
 
 *.swp
 pip-wheel-metadata
+
+# IDE stuff
+/.vscode

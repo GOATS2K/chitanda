@@ -25,20 +25,21 @@ async def on_message(message):
 
 
 async def on_response(response):
-    if not response.relayed:  # Don't relay bot responses that are relays.
-        await _relay(
-            response.bot, response.listener, response.target, response.contents
-        )
+    await _relay(
+        response.bot, response.listener, response.target, response.contents
+    )
 
 
-async def _relay(bot, listener, target, contents, source):
+async def _relay(bot, listener, target, contents, source=None):
     targets = _get_linked_targets(listener, target)
     for target in targets:
         target_listener = get_listener(bot, target['listener'])
         for (author, message) in _get_relay_messages(
             listener, contents, source
         ):
-            await _relay_message(target_listener, bot, target, author, message)
+            await _relay_message(
+                target_listener, bot, target['target'], author, message
+            )
 
 
 def _get_linked_targets(listener, target):
@@ -48,11 +49,10 @@ def _get_linked_targets(listener, target):
     targets = []
     for link in config['relay']:
         link = link.copy()
-        for i, target in enumerate(link):
-            if (
-                target['listener'] == str(listener)
-                and target['target'] == target
-            ):
+        for i, link_target in enumerate(link):
+            if link_target['listener'] == str(listener) and link_target[
+                'target'
+            ] == str(target):
                 del link[i]
                 targets += link
                 break
@@ -112,9 +112,14 @@ async def _(listener, bot, target, author, message):
     name. This remains deterministic until the bot is restarted (or maybe until
     the module is reloaded, not sure).
     """
-    color = abs(hash(author)) % 12 + 2
-    author = f'\x03{color:02d}\x02<{author[:1]}\x02\x02{author[1:]}>\x02\x0F'
-    await listener.message(target, author, message)
+    if author:
+        color = abs(hash(author)) % 12 + 2
+        author = (
+            f'\x03{color:02d}\x02<{author[:1]}\x02\x02{author[1:]}>\x02\x0F'
+        )
+        message = f'{author} {message}'
+
+    await listener.message(target, message)
 
 
 @_relay_message.register(DiscordListener)

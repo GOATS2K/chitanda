@@ -49,6 +49,7 @@ class Message:
 
 class Response:
     def __init__(self, bot, listener, target, contents):
+        self.bot = bot
         self.listener = listener
         self.target = target
 
