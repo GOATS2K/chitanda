@@ -91,10 +91,13 @@ def _(listener, contents, source):
 
         attachments = [a.url for a in source.raw.attachments]
 
-        return (
-            (source.raw.author.display_name, c)
-            for c in [contents, *attachments]
-        )
+        if contents:
+            return (
+                (source.raw.author.display_name, c)
+                for c in [contents, *attachments]
+            )
+        else:
+            return ((source.raw.author.display_name, c) for c in attachments)
 
     return ((None, contents),)
 
