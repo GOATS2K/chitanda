@@ -5,6 +5,8 @@ from functools import singledispatch
 from chitanda.config import config
 from chitanda.listeners import DiscordListener, IRCListener
 from chitanda.util import get_listener
+from discord import Webhook, AsyncWebhookAdapter
+import aiohttp
 
 logger = logging.getLogger(__name__)
 
@@ -128,4 +130,8 @@ async def _(listener, bot, target, author, message):
     For Discord, relay the message using a webhook. Requires server admin to
     configure a webhook endpoint.
     """
-    pass  # Use webhook.
+    async with aiohttp.ClientSession() as session:
+        webhook = Webhook.from_url(
+            config['discord_webhook_url'], adapter=AsyncWebhookAdapter(session)
+        )
+        await webhook.send(message, username=author)
