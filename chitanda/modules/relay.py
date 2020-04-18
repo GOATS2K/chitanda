@@ -89,7 +89,7 @@ def _(listener, contents, source):
                 f'<@!?{mention.id}>', f'@{mention.display_name}', contents
             )
 
-        attachments = [a['url'] for a in source.raw.attachments]
+        attachments = [a.url for a in source.raw.attachments]
 
         return (
             (source.raw.author.display_name, c)
